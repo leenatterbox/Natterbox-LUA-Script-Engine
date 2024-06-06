@@ -1,0 +1,77 @@
+--Should be added to the outbound policy before the Connect App
+--Can be used to add a pool of numbers for different Countries, and when a call is made, a random number will be chosen to be displayed as the Caller ID. This number will then be stored in a Agent_Number__c field on the Call Reporting Record (will need to be added first)
+--If the at least 1 number exists for the called country, this will be set as the CLI and will return true. If no number is found (country is not in the table), then the script will return false.
+
+local numbersTable = {
+    ['GBR'] = {
+		'447915000000',
+		'447915000001',
+		'447915000002',
+		'447915000003'
+    },
+	
+	['IRL'] = {
+		'35319000001',
+		'35319000002',
+		'35319000003'
+	},
+	
+	['FRA'] = {
+		'33743000001',
+		'33743000002',
+		'33743000003',
+		'33743000004'
+	},
+	
+	['ESP'] = {
+		'34930000001',
+		'34930000002',
+		'34910000003'
+	},
+	
+	['PRT'] = {
+		'351300000001',
+		'351300000002',
+		'351300000003'
+	},
+	
+	['USA'] = {
+		'15185000001',
+		'15185000002'
+	},
+	
+	['GRC'] = {
+		'302111000001'
+	},
+	
+	['DEU'] = {
+		'493020000001',
+		'493020000002'
+	},
+	
+	['BEL'] = {
+		'32460000001',
+		'32460000002',
+		'32460000003'
+	},
+  
+}
+
+local countryCode = resolve_country(tonumber(session.expand_macro("$(DialledNumber)")))
+print("Country Code: "..countryCode)
+
+if numbersTable[countryCode] then
+	local numbersAmount = #numbersTable[countryCode]
+	print(numbersAmount)
+	math.randomseed(os.time())
+	
+	local ran = math.random(1,numbersAmount)
+	
+	local presentationNumber = '+'..numbersTable[countryCode][ran]
+	session.modify('PRESENTATION_NUMBER', presentationNumber)
+	session.set("Agent_Number", presentationNumber)
+	
+	return true
+else
+	return false
+end
