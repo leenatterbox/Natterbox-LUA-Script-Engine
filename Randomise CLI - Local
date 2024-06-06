@@ -1,0 +1,19 @@
+--Should be added to the outbound policy before the Connect App
+--Can be used to add a pool of numbers for a single account (usually if only working in one market), and when a call is made, a random number will be chosen to be displayed as the Caller ID. This number will then be stored in a Agent_Number__c field on the Call Reporting Record (will need to be added first)
+
+local numbersTable = {
+		'447915000001',
+		'447915000002',
+		'447915000003',
+		'447915000004'
+}
+                                                             
+enable_debug("email")
+local numbersAmount = #numbersTable
+	math.randomseed(os.time())
+	local ran = math.random(1,numbersAmount)
+	
+	local presentationNumber = '+'..numbersTable[ran]
+	session.modify('PRESENTATION_NUMBER', presentationNumber)
+  session.set("Agent_Number", presentationNumber)
+	return true
