@@ -1,0 +1,11 @@
+--Should be added to the outbound policy before the Connect App
+--Can be used to ensure the Call Reporting Record is linked to the record that was clicked on. Add other objectTypes (and their related CRO field) if needed.
+
+local objectType = session.expand_macro('$(Custom_lc2dobjectType)')
+local objectId = session.expand_macro('$(Custom_lc2drecordId)')
+
+if objectType = Lead then session.set('nbavs__Lead',objectId) return true
+elseif objectType = Contact then session.set('nbavs__Contact',objectId) return true
+elseif objectType = Account then session.set('nbavs__Account',objectId) return true
+elseif objectType = Case then session.set('nbavs__Case',objectId) return true
+else return false
