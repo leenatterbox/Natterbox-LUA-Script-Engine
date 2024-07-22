@@ -1,0 +1,36 @@
+enable_debug("email")
+session.set("CallDirection", "outbound",true)
+
+local dateTime = session.get("CallStartDate")
+local callerNumber = session.get("E164CallerNumber")
+local calledNumber = session.get("E164CalledNumber")
+local uuid = session.get("UUID")
+local agentName = session.get("OwnerFirstName").." "..session.get("OwnerLastName")
+local direction = session.get("CallDirection")
+
+local body = {}
+body.data = {}
+body.data.id = uuid
+body.data.from = callerNumber
+body.data.to = calledNumber
+body.data.type = direction
+body.data.agentName = agentName
+body.data.date = dateTime
+
+local bodyJson = json_encode(body)
+
+local url = 'https://my-api-url.com'
+
+local headers = {}
+headers['Content-Type'] = 'application/json'
+headers.accept = 'application/json'
+headers['API-KEY'] = 'xxxxxx'
+        
+local res = rest.post(url, headers, {}, bodyJson, 'application/json')
+if res.result == 'OK' then
+    print("Response Code: "..(res.code or ''))
+    print("Response Message: "..(res.message or ''))
+    print("Response ContentType: "..(res.contentType or ''))
+else
+    print("Rest call failed to return with error: "..res.result)
+end
