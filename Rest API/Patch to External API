@@ -1,11 +1,11 @@
 enable_debug("email")
 
-local sfRes = connector.sf_query(connectorId, "SELECT NBDelivery__Key__c from NBDelivery__TideKey__c", "Key")
+local sfRes = connector.sf_query(connectorId, "SELECT Key__c from Key__c", "Key")
 	if sfRes == false then
 		return false
 	end
 
-local apiKey = session.expand_macro("$(SForce_Key.NBDelivery__Key__c)")
+local apiKey = session.expand_macro("$(SForce_Key.Key__c)")
 local timeNow = os.time()
 local sftimeNow = strftime('%Y-%m-%d %H:%M:%S', timeNow, 'Europe/London')
 local direction = session.get("CallDirection")
