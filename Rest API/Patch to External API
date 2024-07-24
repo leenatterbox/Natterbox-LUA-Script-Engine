@@ -1,16 +1,32 @@
 enable_debug("email")
 
+local sfRes = connector.sf_query(connectorId, "SELECT NBDelivery__Key__c from NBDelivery__TideKey__c", "Key")
+	if sfRes == false then
+		return false
+	end
+
+local apiKey = session.expand_macro("$(SForce_Key.NBDelivery__Key__c)")
 local timeNow = os.time()
 local sftimeNow = strftime('%Y-%m-%d %H:%M:%S', timeNow, 'Europe/London')
-print(sftimeNow)
+local direction = session.get("CallDirection")
+
+if direction == 'inbound' then
+--	local aName = session.get("ConnectedFirstName").." "..session.get("ConnectedLastName")
+	session.set("callerNumber", session.get("E164CallerNumber"))
+	session.set("aName", session.get("ConnectedFirstName").." "..session.get("ConnectedLastName"))
+	else 
+--	local aName = session.get("OwnerFirstName").." "..session.get("OwnerLastName")
+	session.set("aName", session.get("OwnerFirstName").." "..session.get("OwnerLastName"))
+	session.set("callerNumber", session.get('session_outbound_caller_id_number'))
+end
 
 local dateTime = sftimeNow
-local callerNumber = session.get("E164CallerNumber")
+local callerNumber = session.get("callerNumber")
 local calledNumber = session.get("E164CalledNumber")
 local uuid = session.get("UUID")
-local agentName = session.get("OwnerFirstName").." "..session.get("OwnerLastName")
+local agentName = session.get("aName")
 local reason = session.get("HangupCause")
-local direction = session.get("CallDirection")
+local connected = session.get("CallConnected")
 
 local body = {}
 body.data = {}
@@ -21,6 +37,7 @@ body.data.type = direction
 body.data.agentName = agentName
 body.data.date = dateTime
 body.data.finishReason = reason
+body.data.callconnected = connected
 
 local bodyJson = json_encode(body)
 
@@ -29,7 +46,7 @@ local url = 'https://my-api-url.com'
 local headers = {}
 headers.accept = 'application/json'
 headers['accept'] = 'application/json'
-headers['API-KEY'] = 'xxxxxx'
+headers['API-KEY'] = apiKey
         
 local res = rest.patch(url, headers, {}, bodyJson, 'application/json')
 if res.result == 'OK' then
