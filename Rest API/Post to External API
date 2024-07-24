@@ -1,8 +1,15 @@
 enable_debug("email")
 session.set("CallDirection", "outbound",true)
 
+--get API Key from a custom setting in Salesforce
+local sfRes = connector.sf_query(connectorId, "SELECT Key__c from APIKey__c", "Key")
+	if sfRes == false then
+		return false
+	end
+
+local apiKey = session.expand_macro("$(SForce_Key.Key__c)")
 local dateTime = session.get("CallStartDate")
-local callerNumber = session.get("E164CallerNumber")
+local callerNumber = session.get('session_outbound_caller_id_number')
 local calledNumber = session.get("E164CalledNumber")
 local uuid = session.get("UUID")
 local agentName = session.get("OwnerFirstName").." "..session.get("OwnerLastName")
@@ -24,7 +31,7 @@ local url = 'https://my-api-url.com'
 local headers = {}
 headers['Content-Type'] = 'application/json'
 headers.accept = 'application/json'
-headers['API-KEY'] = 'xxxxxx'
+headers['API-KEY'] = apiKey
         
 local res = rest.post(url, headers, {}, bodyJson, 'application/json')
 if res.result == 'OK' then
