@@ -1,0 +1,28 @@
+--should be added before the connect app in the outbound policy
+--add additional countries and the related CLIs to the table below. Country is the 3 character iso code - https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+
+local numbersTable = {
+    ['GBR'] = {'442030000001'},
+	  ['IRE'] = {'35312345678'},
+    ['FRA'] = {'33123456789'}
+}
+
+if string.sub(session.expand_macro("$(DialledNumber)"),1,1) == "0" 
+then
+session.set("country", session.expand_macro('$(CalledCountryShort)'))
+else
+session.set("country", resolve_country(tonumber(session.expand_macro("$(DialledNumber)"))))
+end
+
+--get the country variable from the previous if statement and set it as a local variable to use in the next statement
+local countryCode = session.get("country")
+
+--if the country 3 digit code is in the table, then set the CLI (presentation number) as the CLI number related to that region. Also set it as the Outbound_CLI managed property and reporting gate (commented out unless you want to include it).
+if numbersTable[countryCode] then
+	local presentationNumber = '+'..numbersTable[countryCode]
+	session.modify('PRESENTATION_NUMBER', presentationNumber)
+	--session.set("Outbound_CLI", presentationNumber)
+	return true
+else
+	return false
+end
