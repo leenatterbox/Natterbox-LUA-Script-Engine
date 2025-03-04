@@ -1,0 +1,13 @@
+local secretKey = "mysecretkey"
+
+local signOptions = {}
+signOptions.issuer = "acme"
+signOptions.expires = 300
+
+local claims = {}
+claims.iss = "acme"
+claims.exp = 300
+claims.expireIn = 300
+
+-- Generate JWT Token
+local jwtToken = crypto.get_jwt(signOptions, "HS256", secretKey, claims)
